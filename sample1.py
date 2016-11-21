@@ -59,7 +59,8 @@ waterfall_rotation = 0
 
 # ####################################################################
 loading_1 = [
-    gamebox.from_text(120, 15, 'Andrew Walsh abw9yd', 'Arial', 20, 'white', italic=True, bold=True),
+    gamebox.from_text(120, 685, 'Andrew Walsh, abw9yd', 'Arial', 20, 'white', italic=True, bold=True),
+    gamebox.from_text(880, 685, 'Kevin Naddoni, kn6vv', 'Arial', 20, 'white', italic=True, bold=True),
     gamebox.from_image(890, 170, 'trophy.png')
 
 ]
