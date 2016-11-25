@@ -3,7 +3,7 @@ import pygame
 import gamebox
 import random
 screen_width = 1000
-screen_length = 700
+screen_length = 600
 camera = gamebox.Camera(screen_width, screen_length)
 counter_space = 0
 counter_coins = 0
@@ -17,6 +17,7 @@ orientation = 'R'
 sheet = gamebox.load_sprite_sheet('images2.png', 5, 8)
 enemy_sheet = gamebox.load_sprite_sheet('flameskull.png', 4, 3)
 coin_sheet = gamebox.load_sprite_sheet('coins.png', 4, 8)
+arrow_sheet = gamebox.load_sprite_sheet('play_arrow.png', 2, 1)
 
 character = gamebox.from_image(screen_width/2, screen_length/2, sheet[counter_space])
 enemies = [gamebox.from_image(random.randint(10, 990), 30, enemy_sheet[counter_enemy])]
@@ -49,7 +50,7 @@ clicked_home = False
 reload = 60
 velocity = 0
 tic_cnt = [0,0,0,0]
-# for_jump, for_sprite
+
 
 curr_pos = 556
 falling = False
@@ -59,13 +60,11 @@ waterfall_rotation = 0
 
 # ####################################################################
 loading_1 = [
-    gamebox.from_text(120, 685, 'Andrew Walsh, abw9yd', 'Arial', 20, 'white', italic=True, bold=True),
-    gamebox.from_text(880, 685, 'Kevin Naddoni, kn6vv', 'Arial', 20, 'white', italic=True, bold=True),
-    gamebox.from_image(890, 170, 'trophy.png')
-
+    gamebox.from_text(120, 585, 'Andrew Walsh, abw9yd', 'Arial', 20, 'white', italic=True, bold=True),
+    gamebox.from_text(880, 585, 'Kevin Naddoni, kn6vv', 'Arial', 20, 'white', italic=True, bold=True),
+    gamebox.from_image(500, 460, 'trophy.png'),
+    gamebox.from_image(500, 300, arrow_sheet[0])
 ]
-
-
 # ####################################################################
 def tick(keys):
     global bullets_l
@@ -104,23 +103,47 @@ def tick(keys):
     global shot_direction
     global waterfall_rotation
 
-    last_round_home = run_home
 
-    camera.draw(gamebox.from_image(500, 350, 'loading_bg.png'))
+    guidelines = [
+        gamebox.from_color(100, 300, 'white', 1, 600),
+        gamebox.from_color(200, 300, 'white', 1, 600),
+        gamebox.from_color(300, 300, 'white', 1, 600),
+        gamebox.from_color(400, 300, 'white', 1, 600),
+        gamebox.from_color(500, 300, 'white', 1, 600),
+        gamebox.from_color(600, 300, 'white', 1, 600),
+        gamebox.from_color(700, 300, 'white', 1, 600),
+        gamebox.from_color(800, 300, 'white', 1, 600),
+        gamebox.from_color(900, 300, 'white', 1, 600),
+        gamebox.from_color(500, 100, 'white', 1000, 1),
+        gamebox.from_color(500, 200, 'white', 1000, 1),
+        gamebox.from_color(500, 300, 'white', 1000, 1),
+        gamebox.from_color(500, 400, 'white', 1000, 1),
+        gamebox.from_color(500, 500, 'white', 1000, 1),
+        gamebox.from_color(500, 235, 'white', 1000, 1),
+            ]
+
+
+    camera.draw(gamebox.from_image(500, 300, 'loading_bg.png'))
 
 # clicked test
 # #####################################################################
-    if camera.mousex > 500 > camera.mousey and camera.mouseclick and run_skulls is False and run_leaderboards is False:
+    if 440 < camera.mousex < 560 and 380 < camera.mousey < 540 and camera.mouseclick and run_skulls is False and run_leaderboards is False:
         clicked_leaderboard = True
         clicked_home = False
         camera.clear('black')
 
-    if camera.mousex < 500 and camera.mousey > 350 and camera.mouseclick:
+    if ((316 < camera.mousex < 622 and 267 < camera.mousey < 332) or (622 < camera.x < 685 and 235 < camera.y < 365)) and camera.mouseclick:
         clicked_skulls = True
         clicked_leaderboard = False
         clicked_home = False
 
-    if run_leaderboards and run_skulls is False and camera.mousex >= 968 and camera.mousey >= 668 and camera.mouseclick:
+    if (316 < camera.mousex < 622 and 267 < camera.mousey < 332) or (622 < camera.x < 685 and 235 < camera.y < 365):
+        loading_1[3] = gamebox.from_image(500, 300, arrow_sheet[1])
+    else:
+        loading_1[3] = gamebox.from_image(500, 300, arrow_sheet[0])
+
+
+    if run_leaderboards and run_skulls is False and camera.mousex >= 936 and camera.mousey >= 536 and camera.mouseclick:
         clicked_home = True
         clicked_leaderboard = False
 
@@ -154,17 +177,21 @@ def tick(keys):
             record_coin.y += 2
             record_coin = gamebox.from_image(record_coin.x, record_coin.y, coin_sheet[1 + waterfall_rotation])
             camera.draw(record_coin)
-        camera.draw(gamebox.from_image(968, 668, 'home_button.png'))
+        camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
 
     if run_home:
         for parts in loading_1:
             camera.draw(parts)
 
-    #if last_round_home != run_home:
-    #    camera.clear('white')
+
+    for guides in guidelines:
+        camera.draw(guides)
+
+
+
+
+
 # ############################################################################################################################
-
-
     if run_skulls:
         for varb in range(len(tic_cnt)):
             tic_cnt[varb] += 1
@@ -175,28 +202,28 @@ def tick(keys):
         if pygame.K_p in keys:
             gamebox.pause()
 
-        background = gamebox.from_image(500, 350, 'background_image.jpg')
+        background = gamebox.from_image(500, 300, 'background_image.jpg')
         background.size = 1000, 700
         camera.draw(background)
 
     #                            x center//y center//colour//width//height
-        walls = [gamebox.from_image(500, 695, 'platform_block.png'),
-                 gamebox.from_image(75, 600, 'platform_block.png'),
-                 gamebox.from_image(400, 480, 'platform_block.png'),
-                 gamebox.from_image(290, 540, 'platform_block.png'),
-                 gamebox.from_image(600, 498, 'platform_block.png'),
-                 gamebox.from_image(900, 420, 'platform_block.png'),
-                 gamebox.from_image(750, 640, 'platform_block.png'),
-                 gamebox.from_image(160, 440, 'platform_block.png'),
-                 gamebox.from_image(860, 580, 'platform_block.png'),
-                 gamebox.from_image(765, 540, 'platform_block.png'),
-                 gamebox.from_image(450, 600, 'platform_block.png'),
-                 gamebox.from_image(30, 360, 'platform_block.png'),
-                 gamebox.from_image(250, 250, 'platform_block.png'),
-                 gamebox.from_image(450, 250, 'platform_block.png'),
-                 gamebox.from_image(100, 305, 'platform_block.png'),
-                 gamebox.from_image(650, 360, 'platform_block.png'),
-                 gamebox.from_image(550, 305, 'platform_block.png'),
+        walls = [gamebox.from_image(500, 595, 'platform_block.png'),
+                 gamebox.from_image(75, 500, 'platform_block.png'),
+                 gamebox.from_image(400, 380, 'platform_block.png'),
+                 gamebox.from_image(290, 440, 'platform_block.png'),
+                 gamebox.from_image(600, 398, 'platform_block.png'),
+                 gamebox.from_image(900, 320, 'platform_block.png'),
+                 gamebox.from_image(750, 540, 'platform_block.png'),
+                 gamebox.from_image(160, 340, 'platform_block.png'),
+                 gamebox.from_image(860, 480, 'platform_block.png'),
+                 gamebox.from_image(765, 440, 'platform_block.png'),
+                 gamebox.from_image(450, 500, 'platform_block.png'),
+                 gamebox.from_image(30, 260, 'platform_block.png'),
+                 gamebox.from_image(250, 150, 'platform_block.png'),
+                 gamebox.from_image(450, 150, 'platform_block.png'),
+                 gamebox.from_image(100, 205, 'platform_block.png'),
+                 gamebox.from_image(650, 260, 'platform_block.png'),
+                 gamebox.from_image(550, 205, 'platform_block.png'),
                  ]
 
         walls[0].size = 1000, 10
@@ -217,8 +244,8 @@ def tick(keys):
         walls[15].size = 100, 10
         walls[16].size = 20, 10
         sides = [
-            gamebox.from_color(1, 350, 'black', 2, 700),
-            gamebox.from_color(999, 350, 'black', 2, 700)
+            gamebox.from_color(1, 300, 'black', 2, 600),
+            gamebox.from_color(999, 300, 'black', 2, 600)
         ]
 
     #    Variables
@@ -269,8 +296,8 @@ def tick(keys):
             character.x = 0
         if character.y < 30:
             character.y = 30
-        if character.y > 690:
-            character.y = 690
+        if character.y > 590:
+            character.y = 590
 
     # Test for falling
         if curr_pos != character.y:
@@ -398,7 +425,7 @@ def tick(keys):
             score_recording.close()
 
             ###
-            score_display = gamebox.from_text(500, 350, 'Your final score is: '+str(score), 'Arial', 90, 'red', italic=True, bold=True)
+            score_display = gamebox.from_text(500, 300, 'Your final score is: '+str(score), 'Arial', 90, 'red', italic=True, bold=True)
             camera.draw(score_display)
 
 
