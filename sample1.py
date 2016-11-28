@@ -18,6 +18,7 @@ sheet = gamebox.load_sprite_sheet('images2.png', 5, 8)
 enemy_sheet = gamebox.load_sprite_sheet('flameskull.png', 4, 3)
 coin_sheet = gamebox.load_sprite_sheet('coins.png', 4, 8)
 arrow_sheet = gamebox.load_sprite_sheet('play_arrow.png', 2, 1)
+inst_button_sheet = gamebox.load_sprite_sheet('inst_button.png', 2, 1)
 
 character = gamebox.from_image(screen_width/2, screen_length/2, sheet[counter_space])
 enemies = [gamebox.from_image(random.randint(10, 990), 30, enemy_sheet[counter_enemy])]
@@ -40,12 +41,12 @@ enemy_spawn_rate = (60)*7
 run_skulls = False
 run_leaderboards = False
 run_home = True
-
+run_instructions = False
 
 clicked_skulls = False
 clicked_leaderboard = False
 clicked_home = False
-
+clicked_instructions = False
 
 reload = 60
 velocity = 0
@@ -63,7 +64,8 @@ loading_1 = [
     gamebox.from_text(120, 585, 'Andrew Walsh, abw9yd', 'Arial', 20, 'white', italic=True, bold=True),
     gamebox.from_text(880, 585, 'Kevin Naddoni, kn6vv', 'Arial', 20, 'white', italic=True, bold=True),
     gamebox.from_image(500, 460, 'trophy.png'),
-    gamebox.from_image(500, 300, arrow_sheet[0])
+    gamebox.from_image(500, 300, arrow_sheet[0]),
+    gamebox.from_image(500, 150, inst_button_sheet[0])
 ]
 # ####################################################################
 def tick(keys):
@@ -72,6 +74,7 @@ def tick(keys):
     global character
     global character_speed
     global clicked_home
+    global clicked_instructions
     global clicked_leaderboard
     global clicked_skulls
     global coin_sheet
@@ -95,6 +98,8 @@ def tick(keys):
     global records_coins
     global reload
     global reload_time
+    global run_home
+    global run_instructions
     global run_leaderboards
     global run_skulls
     global tic_cnt
@@ -126,6 +131,7 @@ def tick(keys):
 
 # clicked test
 # #####################################################################
+#sets up clicks
     if 440 < camera.mousex < 560 and 380 < camera.mousey < 540 and camera.mouseclick and run_skulls is False and run_leaderboards is False:
         clicked_leaderboard = True
         clicked_home = False
@@ -136,17 +142,32 @@ def tick(keys):
         clicked_leaderboard = False
         clicked_home = False
 
+    #changes lighting of play game arrow
     if (316 < camera.mousex < 622 and 267 < camera.mousey < 332) or (622 < camera.x < 685 and 235 < camera.y < 365):
         loading_1[3] = gamebox.from_image(500, 300, arrow_sheet[1])
     else:
         loading_1[3] = gamebox.from_image(500, 300, arrow_sheet[0])
 
+    #changes lighting of instructions arrow
+    if (316 < camera.mousex < 622 and 17 < camera.mousey < 182) or (622 < camera.x < 685 and 85 < camera.y < 185):
+        loading_1[4] = gamebox.from_image(500, 150, inst_button_sheet[1])
+    else:
+        loading_1[4] = gamebox.from_image(500, 150, inst_button_sheet[0])
 
-    if run_leaderboards and run_skulls is False and camera.mousex >= 936 and camera.mousey >= 536 and camera.mouseclick:
+
+    if (run_leaderboards or run_instructions) and run_skulls is False and (camera.mousex >= 936 and camera.mousey >= 536 and camera.mouseclick):
         clicked_home = True
         clicked_leaderboard = False
+        clicked_instructions = False
+
+    #sets up click for instructions
+    if ((316 < camera.mousex < 622 and 267 < camera.mousey < 332) or (622 < camera.x < 685 and 235 < camera.y < 365)) and camera.mouseclick:
+        clicked_instructions = True
+        clicked_home = False
+
 
 # #####################################################################
+#uses clicks to set up runs
     if clicked_leaderboard:
         run_leaderboards = True
         run_home = False
@@ -161,8 +182,13 @@ def tick(keys):
     elif clicked_home is False:
         run_home is False
 
+    if clicked_instructions:
+        run_instructions = True
+        run_home = False
+    elif clicked_instructions is False:
+        run_instructions = False
 
-
+#runs leaderboards based upon above
     if run_leaderboards:
         counter_coins += 1
         if counter_coins == 2:
@@ -178,6 +204,7 @@ def tick(keys):
             camera.draw(record_coin)
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
 
+#runs home based upon above
     if run_home:
         for parts in loading_1:
             camera.draw(parts)
@@ -186,7 +213,10 @@ def tick(keys):
     for guides in guidelines:
         camera.draw(guides)
 
-
+#runs instructions
+    if run_instructions:
+        camera.clear('red')
+        camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
 
 
 
