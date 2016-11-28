@@ -119,7 +119,6 @@ def tick(keys):
         gamebox.from_color(500, 300, 'white', 1000, 1),
         gamebox.from_color(500, 400, 'white', 1000, 1),
         gamebox.from_color(500, 500, 'white', 1000, 1),
-        gamebox.from_color(500, 235, 'white', 1000, 1),
             ]
 
 
