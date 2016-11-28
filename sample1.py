@@ -132,11 +132,12 @@ def tick(keys):
 # clicked test
 # #####################################################################
 #sets up clicks
+    # SHOWS LEADERBOARDS
     if 440 < camera.mousex < 560 and 380 < camera.mousey < 540 and camera.mouseclick and run_skulls is False and run_leaderboards is False:
         clicked_leaderboard = True
         clicked_home = False
         camera.clear('black')
-
+    # PLAYS GAME
     if ((316 < camera.mousex < 622 and 267 < camera.mousey < 332) or (622 < camera.x < 685 and 235 < camera.y < 365)) and camera.mouseclick:
         clicked_skulls = True
         clicked_leaderboard = False
@@ -154,14 +155,14 @@ def tick(keys):
     else:
         loading_1[4] = gamebox.from_image(500, 150, inst_button_sheet[0])
 
-
+    # HOME BUTTON
     if (run_leaderboards or run_instructions) and run_skulls is False and (camera.mousex >= 936 and camera.mousey >= 536 and camera.mouseclick):
         clicked_home = True
         clicked_leaderboard = False
         clicked_instructions = False
 
     #sets up click for instructions
-    if ((316 < camera.mousex < 622 and 267 < camera.mousey < 332) or (622 < camera.x < 685 and 235 < camera.y < 365)) and camera.mouseclick:
+    if ((316 < camera.mousex < 622 and 17 < camera.mousey < 182) or (622 < camera.x < 685 and 235 < camera.y < 365)) and camera.mouseclick and run_skulls is False and run_instructions is False:
         clicked_instructions = True
         clicked_home = False
 
