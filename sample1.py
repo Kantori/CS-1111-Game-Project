@@ -216,9 +216,16 @@ def tick(keys):
 
 #runs instructions
     if run_instructions:
-        camera.clear('red')
+        camera.clear('black')
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
-
+        camera.draw(gamebox.from_text(500,100,'Hello! This is __ created by Andrew Walsh and Kevin Naddoni. Objectives and controls are listed below.','Arial',20,'white',False,False))
+        camera.draw(gamebox.from_text(200, 200,'Objectives:','Arial', 20, 'white', True, False))
+        camera.draw(gamebox.from_text(500, 250, 'Collect as many coins as possible!','Arial', 20, 'white', False, False))
+        camera.draw(gamebox.from_text(500, 300, 'Shoot enemies down with your laser pistol!','Arial', 20, 'white', False, False))
+        camera.draw(gamebox.from_text(500, 350, 'Play until you reach the top of the leaderboards!','Arial', 20, 'white', False, False))
+        camera.draw(gamebox.from_text(200, 400, 'Controls:', 'Arial', 20, 'white', True, False))
+        camera.draw(gamebox.from_text(500, 450, 'Use arrow keys (←,→,↓,↑) to travel the map', 'Arial', 20, 'white', False,False))
+        camera.draw(gamebox.from_text(500, 500, 'Press the spacebar to shoot at enemies', 'Arial', 20, 'white', False,False))
 
 
 # ############################################################################################################################
