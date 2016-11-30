@@ -67,6 +67,18 @@ loading_1 = [
     gamebox.from_image(500, 300, arrow_sheet[0]),
     gamebox.from_image(500, 150, inst_button_sheet[0])
 ]
+
+score_rec_disp = open('scoreboard.txt', 'r')
+line_read = score_rec_disp.readline().split(',')
+score_rec_disp.close()
+
+score_clearing = open('scoreboard.txt', 'w')
+score_clearing.write('')
+score_clearing.close()
+
+for string_score in range(len(line_read)):
+    line_read[string_score] = int(line_read[string_score])
+
 # ####################################################################
 def tick(keys):
     global bullets_l
@@ -93,6 +105,7 @@ def tick(keys):
     global run_home
     global kills
     global life
+    global line_read
     global loading_1
     global orientation
     global records_coins
@@ -204,6 +217,9 @@ def tick(keys):
             record_coin = gamebox.from_image(record_coin.x, record_coin.y, coin_sheet[1 + waterfall_rotation])
             camera.draw(record_coin)
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
+        for a in range(0,10):
+            sum = 100+20*a
+            camera.draw(gamebox.from_text(150,sum,line_read[0],'Arial',12,'white'))
 
 #runs home based upon above
     if run_home:
@@ -216,7 +232,7 @@ def tick(keys):
 
 #runs instructions
     if run_instructions:
-        camera.clear('black')
+        #camera.clear('black')
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
         camera.draw(gamebox.from_text(500,100,'Hello! This is __ created by Andrew Walsh and Kevin Naddoni. Objectives and controls are listed below.','Arial',20,'white',False,False))
         camera.draw(gamebox.from_text(200, 200,'Objectives:','Arial', 20, 'white', True, False))
@@ -230,6 +246,8 @@ def tick(keys):
 
 # ############################################################################################################################
     if run_skulls:
+        coin_sound = gamebox.load_sound('coin_sound.wav')
+        gun_sound = gamebox.load_sound('gun_sound.wav')
         for varb in range(len(tic_cnt)):
             tic_cnt[varb] += 1
 
@@ -423,6 +441,7 @@ def tick(keys):
 
         if pygame.K_SPACE in keys and pygame.K_RIGHT not in keys and pygame.K_LEFT not in keys and not falling:
             character = gamebox.from_image(character.x, character.y, sheet[19])
+            music_player2 = gun_sound.play()
         elif pygame.K_SPACE in keys and (pygame.K_RIGHT in keys or pygame.K_LEFT in keys) and not falling:
             character = gamebox.from_image(character.x, character.y, sheet[16 + counter_space])
         elif pygame.K_SPACE not in keys and (pygame.K_RIGHT in keys or pygame.K_LEFT in keys) and not falling:
@@ -439,17 +458,6 @@ def tick(keys):
 
             if invincibility == False:
                 gamebox.pause()
-
-            score_rec_disp = open('scoreboard.txt', 'r')
-            line_read = score_rec_disp.readline().split(',')
-            score_rec_disp.close()
-
-            score_clearing = open('scoreboard.txt', 'w')
-            score_clearing.write('')
-            score_clearing.close()
-
-            for string_score in range(len(line_read)):
-                line_read[string_score] = int(line_read[string_score])
 
             line_read.append(score)
             line_read = sorted(line_read)
@@ -496,6 +504,7 @@ def tick(keys):
             coin.y += 5
             coin_timer[coins.index(coin)] -= 1
             if coin.touches(character):
+                music_player = coin_sound.play()
                 score += 1
                 heal += 1
                 coin_timer.remove(coin_timer[coins.index(coin)])
