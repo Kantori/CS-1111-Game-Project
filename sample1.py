@@ -68,16 +68,7 @@ loading_1 = [
     gamebox.from_image(500, 150, inst_button_sheet[0])
 ]
 
-score_rec_disp = open('scoreboard.txt', 'r')
-line_read = score_rec_disp.readline().split(',')
-score_rec_disp.close()
 
-score_clearing = open('scoreboard.txt', 'w')
-score_clearing.write('')
-score_clearing.close()
-
-for string_score in range(len(line_read)):
-    line_read[string_score] = int(line_read[string_score])
 
 # ####################################################################
 def tick(keys):
@@ -138,6 +129,14 @@ def tick(keys):
         gamebox.from_color(500, 400, 'white', 1000, 1),
         gamebox.from_color(500, 500, 'white', 1000, 1),
             ]
+
+    score_rec_disp = open('scoreboard.txt', 'r')
+    line_read = score_rec_disp.readline().split(',')
+    score_rec_disp.close()
+    for string_score in range(len(line_read)):
+        line_read[string_score] = int(line_read[string_score])
+    line_read = sorted(line_read)
+    line_read.reverse()
 
 
     camera.draw(gamebox.from_image(500, 300, 'loading_bg.png'))
@@ -217,9 +216,17 @@ def tick(keys):
             record_coin = gamebox.from_image(record_coin.x, record_coin.y, coin_sheet[1 + waterfall_rotation])
             camera.draw(record_coin)
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
-        for a in range(0,10):
-            sum = 100+20*a
-            camera.draw(gamebox.from_text(150,sum,line_read[0],'Arial',12,'white'))
+        if len(line_read) < 5:
+            top_five = len(line_read)
+        else:
+            top_five = 5
+            for b in range(5, 10):
+                sum_2 = 120 + 100*(b-5)
+                camera.draw(gamebox.from_text(666, sum_2, str(line_read[b]), 'Arial', 100, 'white'))
+
+        for a in range(0, top_five):
+            sum = 120 + 100*a
+            camera.draw(gamebox.from_text(333, sum, str(line_read[a]), 'Arial', 100, 'white'))
 
 #runs home based upon above
     if run_home:
@@ -459,8 +466,20 @@ def tick(keys):
             if invincibility == False:
                 gamebox.pause()
 
+            # score_rec_disp = open('scoreboard.txt', 'r')
+            # line_read = score_rec_disp.readline().split(',')
+            # score_rec_disp.close()
+
+            score_clearing = open('scoreboard.txt', 'w')
+            score_clearing.write('')
+            score_clearing.close()
+
+            # for string_score in range(len(line_read)):
+            #     line_read[string_score] = int(line_read[string_score])
+
             line_read.append(score)
             line_read = sorted(line_read)
+            line_read.reverse()
             score_recording = open('scoreboard.txt', 'a')
             for number_of_scores in range(len(line_read)):
                 if number_of_scores == 0:
