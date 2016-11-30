@@ -381,7 +381,8 @@ def tick(keys):
                     kills += 1
                     if bullet_l in bullets_l:
                         bullets_l.remove(bullet_l)
-            camera.draw(bullet_l)
+            if life != 0:
+                camera.draw(bullet_l)
 
         for bullet_r in bullets_r:
             for side in sides:
@@ -396,7 +397,8 @@ def tick(keys):
                     kills += 1
                     if bullet_r in bullets_r:
                         bullets_r.remove(bullet_r)
-            camera.draw(bullet_r)
+            if life != 0:
+                camera.draw(bullet_r)
 
         if orientation == 'L':
             shot_direction = -5
@@ -429,12 +431,10 @@ def tick(keys):
             character = gamebox.from_image(character.x, character.y, sheet[1 + counter_space])
 
     # ############# Health ################################################
-        health = gamebox.from_image(500, 15, 'health_bar.png')
-        health.size = life, 30
         for hurt in enemies:
             if character.touches(hurt):
-                if life > 0:
-                    life -= 5
+                #if life > 0:
+                life -= 5
         if life == 0:
 
             if invincibility == False:
@@ -460,11 +460,13 @@ def tick(keys):
                 else:
                     score_recording.write(','+str(line_read[number_of_scores]))
             score_recording.close()
-
-            ###
-            score_display = gamebox.from_text(500, 300, 'Your final score is: '+str(score), 'Arial', 90, 'red', italic=True, bold=True)
+            score_display = gamebox.from_text(500, 300, 'Your final score is: ' + str(score), 'Arial', 90, 'red', italic=True, bold=True)
             camera.draw(score_display)
 
+        health = gamebox.from_image(500, 15, 'health_bar.png')
+        no_health = gamebox.from_image(500, 15, 'no_health_bar.png')
+        health.size = life, 30
+        no_health.size = 500, 30
 
         if heal == coins_to_heal and life < 500:
             heal = 0
@@ -506,7 +508,8 @@ def tick(keys):
                     coin_timer.remove(time_left)
             coin = gamebox.from_image(coin.x, coin.y, coin_sheet[counter_coins])
             # coin.scale_by(0.2)
-            camera.draw(coin)
+            if life != 0:
+                camera.draw(coin)
         score_display = gamebox.from_text(20, 15, str(score), 'Arial', 20, 'yellow', italic=True, bold=True)
         health_display = gamebox.from_text(500, 15, str(life), 'Arial', 20, 'white', italic=True, bold=True)
         kills_display = gamebox.from_text(20, 40, str(kills), 'Arial', 20, 'red', italic=True, bold=True)
@@ -532,22 +535,25 @@ def tick(keys):
                     koin.move_to_stop_overlapping(wall)
             if character.touches(wall):
                 character.move_to_stop_overlapping(wall)
-            camera.draw(wall)
+            if life != 0:
+                camera.draw(wall)
 
         if orientation == 'L':
             character == character.flip()
 
     # General Drawing area
-        camera.draw(score_display)
-        camera.draw(kills_display)
-        camera.draw(character)
-        camera.draw(health)
-        camera.draw(health_display)
-        for evil in enemies:
-            evil = gamebox.from_image(evil.x, evil.y, enemy_sheet[counter_enemy])
-            camera.draw(evil)
-        for z in range(len(sides)):
-            camera.draw(sides[z])
+        if life != 0:
+            camera.draw(score_display)
+            camera.draw(kills_display)
+            camera.draw(character)
+            camera.draw(no_health)
+            camera.draw(health)
+            camera.draw(health_display)
+            for evil in enemies:
+                evil = gamebox.from_image(evil.x, evil.y, enemy_sheet[counter_enemy])
+                camera.draw(evil)
+            for z in range(len(sides)):
+                camera.draw(sides[z])
 
 
 
