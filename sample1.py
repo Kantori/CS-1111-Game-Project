@@ -31,6 +31,8 @@ coins_towards_reload_increase = 0
 score = 0
 difficulty_increasing = 0
 
+enemy_explosions = []
+explosion_length = []
 bullets_r = []
 bullets_l = []
 shot_direction = 5
@@ -58,6 +60,7 @@ falling = False
 
 records_coins = []
 waterfall_rotation = 0
+falling_coin_rate = 0
 
 # ####################################################################
 loading_1 = [
@@ -90,8 +93,11 @@ def tick(keys):
     global curr_pos
     global difficulty_increasing
     global enemies
+    global enemy_explosions
     global enemy_spawn_rate
+    global explosion_length
     global falling
+    global falling_coin_rate
     global heal
     global run_home
     global kills
@@ -204,29 +210,42 @@ def tick(keys):
 #runs leaderboards based upon above
     if run_leaderboards:
         counter_coins += 1
+        falling_coin_rate += 1
         if counter_coins == 2:
             waterfall_rotation += 1
             counter_coins = 0
         if waterfall_rotation == 28:
             waterfall_rotation = 0
-
-        records_coins.append(gamebox.from_image(random.randint(15, 985), 15, coin_sheet[1 + waterfall_rotation]))
+        if falling_coin_rate == 5:
+            falling_coin_rate = 0
+            records_coins.append(gamebox.from_image(random.randint(15, 985), 15, coin_sheet[1 + waterfall_rotation]))
         for record_coin in records_coins:
             record_coin.y += 2
             record_coin = gamebox.from_image(record_coin.x, record_coin.y, coin_sheet[1 + waterfall_rotation])
+            if record_coin.y > 610:
+                del records_coins[0]
             camera.draw(record_coin)
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
+        camera.draw(gamebox.from_text(500, 50, 'HIGH SCORES', 'Arial', 100, 'gold', bold=True, italic=True))
         if len(line_read) < 5:
             top_five = len(line_read)
         else:
             top_five = 5
+
             for b in range(5, 10):
-                sum_2 = 120 + 100*(b-5)
-                camera.draw(gamebox.from_text(666, sum_2, str(line_read[b]), 'Arial', 100, 'white'))
+                sum_2 = 150 + 100*(b-5)
+                camera.draw(gamebox.from_text(766, sum_2, str(line_read[b]), 'Arial', 100, 'white', bold=False))
+                camera.draw(gamebox.from_text(623, sum_2, str(b+1)+ '.  ', 'Arial', 80, 'black'))
 
         for a in range(0, top_five):
-            sum = 120 + 100*a
-            camera.draw(gamebox.from_text(333, sum, str(line_read[a]), 'Arial', 100, 'white'))
+            sum = 150 + 100*a
+            if a < 3:
+                camera.draw(gamebox.from_text(350, sum, str(line_read[a]), 'Arial', 100, 'gold', bold=True, italic=True))
+                camera.draw(gamebox.from_text(220, sum, str(a+1) + '.  ', 'Arial', 80, 'red'))
+            else:
+                camera.draw(gamebox.from_text(333, sum, str(line_read[a]), 'Arial', 100, 'white', bold=False))
+                camera.draw(gamebox.from_text(220, sum, str(a + 1) + '.  ', 'Arial', 80, 'black'))
+
 
 #runs home based upon above
     if run_home:
@@ -234,32 +253,32 @@ def tick(keys):
             camera.draw(parts)
 
 
-    for guides in guidelines:
-        camera.draw(guides)
+    # for guides in guidelines:
+    #     camera.draw(guides)
 
 #runs instructions
     if run_instructions:
         #camera.clear('black')
         camera.draw(gamebox.from_image(968, 568, 'home_button.png'))
-        camera.draw(gamebox.from_text(500,100,'Hello! This is __ created by Andrew Walsh and Kevin Naddoni. Objectives and controls are listed below.','Arial',20,'white',False,False))
-        camera.draw(gamebox.from_text(200, 200,'Objectives:','Arial', 20, 'white', True, False))
+        camera.draw(gamebox.from_text(500, 100, 'Hello! This is __ created by Andrew Walsh and Kevin Naddoni. Objectives and controls are listed below.', 'Arial', 20, 'white', False, False))
+        camera.draw(gamebox.from_text(500, 150, 'On the homepage, click on the Trophy to see the Top Scores!', 'Arial', 20, 'white'))
+        camera.draw(gamebox.from_text(200, 200, 'Objectives:','Arial', 20, 'white', True, False))
         camera.draw(gamebox.from_text(500, 250, 'Collect as many coins as possible!','Arial', 20, 'white', False, False))
-        camera.draw(gamebox.from_text(500, 300, 'Shoot enemies down with your laser pistol!','Arial', 20, 'white', False, False))
+        camera.draw(gamebox.from_text(500, 300, 'Enemies will hurt you if you touch them. Shoot them down with your laser pistol!', 'Arial', 20, 'white', False, False))
         camera.draw(gamebox.from_text(500, 350, 'Play until you reach the top of the leaderboards!','Arial', 20, 'white', False, False))
         camera.draw(gamebox.from_text(200, 400, 'Controls:', 'Arial', 20, 'white', True, False))
         camera.draw(gamebox.from_text(500, 450, 'Use arrow keys (←,→,↓,↑) to travel the map', 'Arial', 20, 'white', False,False))
-        camera.draw(gamebox.from_text(500, 500, 'Press the spacebar to shoot at enemies', 'Arial', 20, 'white', False,False))
+        camera.draw(gamebox.from_text(500, 500, 'Press the spacebar to shoot at enemies', 'Arial', 20, 'white', False, False))
 
 
 # ############################################################################################################################
     if run_skulls:
         coin_sound = gamebox.load_sound('coin_sound.wav')
         gun_sound = gamebox.load_sound('gun_sound.wav')
+        enemy_death_sound = gamebox.load_sound('enemy_death_sound.wav')
+        game_over_sound = gamebox.load_sound('game_over.wav')
         for varb in range(len(tic_cnt)):
             tic_cnt[varb] += 1
-
-        if tic_cnt[0] == 30:
-            tic_cnt[0] = 0
 
         if pygame.K_p in keys:
             gamebox.pause()
@@ -383,15 +402,23 @@ def tick(keys):
             if pygame.K_SPACE in keys:
                 if orientation == 'L':
                     bullets_l.append(gamebox.from_image(character.x, character.y, 'bullet_l.png'))
+                    gun_sound.play()
                     reload = reload_time
                 else:
                     bullets_r.append(gamebox.from_image(character.x, character.y, 'bullet_r.png'))
+                    gun_sound.play()
                     reload = reload_time
 
         for c in range(len(bullets_l)):
             bullets_l[c].x -= 5
         for d in range(len(bullets_r)):
             bullets_r[d].x += 5
+
+        for p in range(len(explosion_length)):
+            explosion_length[p] += 1
+            if explosion_length[p] == 15:
+                del enemy_explosions[p]
+                del explosion_length[p]
 
         for bullet_l in bullets_l:
             for side in sides:
@@ -402,7 +429,10 @@ def tick(keys):
                     bullets_l.remove(bullet_l)
             for enemy in enemies:
                 if bullet_l.touches(enemy):
+                    enemy_explosions.append(gamebox.from_image(enemy.x, enemy.y, 'explosion.png'))
+                    explosion_length.append(0)
                     enemies.remove(enemy)
+                    enemy_death_sound.play()
                     kills += 1
                     if bullet_l in bullets_l:
                         bullets_l.remove(bullet_l)
@@ -418,7 +448,10 @@ def tick(keys):
                     bullets_r.remove(bullet_r)
             for enemy in enemies:
                 if bullet_r.touches(enemy):
+                    enemy_explosions.append(gamebox.from_image(enemy.x, enemy.y, 'explosion.png'))
+                    explosion_length.append(0)
                     enemies.remove(enemy)
+                    enemy_death_sound.play()
                     kills += 1
                     if bullet_r in bullets_r:
                         bullets_r.remove(bullet_r)
@@ -448,7 +481,7 @@ def tick(keys):
 
         if pygame.K_SPACE in keys and pygame.K_RIGHT not in keys and pygame.K_LEFT not in keys and not falling:
             character = gamebox.from_image(character.x, character.y, sheet[19])
-            music_player2 = gun_sound.play()
+
         elif pygame.K_SPACE in keys and (pygame.K_RIGHT in keys or pygame.K_LEFT in keys) and not falling:
             character = gamebox.from_image(character.x, character.y, sheet[16 + counter_space])
         elif pygame.K_SPACE not in keys and (pygame.K_RIGHT in keys or pygame.K_LEFT in keys) and not falling:
@@ -465,6 +498,7 @@ def tick(keys):
 
             if invincibility == False:
                 gamebox.pause()
+            game_over_sound.play()
 
             # score_rec_disp = open('scoreboard.txt', 'r')
             # line_read = score_rec_disp.readline().split(',')
@@ -523,7 +557,7 @@ def tick(keys):
             coin.y += 5
             coin_timer[coins.index(coin)] -= 1
             if coin.touches(character):
-                music_player = coin_sound.play()
+                coin_sound.play()
                 score += 1
                 heal += 1
                 coin_timer.remove(coin_timer[coins.index(coin)])
@@ -535,7 +569,6 @@ def tick(keys):
                     coins.remove(coins[coin_timer.index(time_left)])
                     coin_timer.remove(time_left)
             coin = gamebox.from_image(coin.x, coin.y, coin_sheet[counter_coins])
-            # coin.scale_by(0.2)
             if life != 0:
                 camera.draw(coin)
         score_display = gamebox.from_text(20, 15, str(score), 'Arial', 20, 'yellow', italic=True, bold=True)
@@ -582,7 +615,8 @@ def tick(keys):
                 camera.draw(evil)
             for z in range(len(sides)):
                 camera.draw(sides[z])
-
+            for things in enemy_explosions:
+                camera.draw(things)
 
 
         #camera.display()
